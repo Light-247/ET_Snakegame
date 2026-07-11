@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>넘버블록스 스네이크! - 태양이와 아빠의 숫자 놀이</title>
+  <meta name="description" content="태양이와 함께하는 럼버블록(넘버블록스) 스타일의 재미있는 숫자 스네이크 게임! 먹이를 먹을 때마다 숫자가 커지고 귀여운 소리가 나요.">
+  <link rel="stylesheet" href="styles.css?v=1.1">
+</head>
+<body>
+  <!-- Playful grid background particles -->
+  <div class="bg-grid"></div>
+
+  <div class="game-container">
+    <header>
+      <h1 id="game-title">넘버블록스 스네이크!</h1>
+      <p class="subtitle">태양이랑 아빠랑 함께 만드는 신나는 블록 쌓기 놀이 🎮</p>
+    </header>
+
+    <div class="dashboard">
+      <!-- Left Column: Game Canvas and Overlays -->
+      <main class="canvas-panel">
+        <!-- V2 Mission Banner -->
+        <div id="mission-banner" class="mission-banner hidden">
+          <span class="mission-icon">🎯</span>
+          <span id="mission-text">미션: 숫자 7을 만드세요! (현재: 1)</span>
+        </div>
+
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Start Game Screen Overlay -->
+        <div id="start-overlay" class="overlay">
+          <div class="modal-content">
+            <h2 class="modal-title">출발 준비!</h2>
+            <p class="modal-desc">
+              방향키 나 화면의 버튼을 눌러서 움직여요.<br>
+              반짝이는 별을 먹으면 몸이 점점 길어져요!<br>
+              쉬고 싶을 땐 <strong>P</strong> 키나 잠깐 쉬기 버튼을 눌러요.<br>
+              길어진 만큼 귀여운 넘버블록스 친구들을 도감에서 만날 수 있어요.
+            </p>
+            <button id="start-btn" class="btn btn-primary">게임 시작하기! 🚀</button>
+          </div>
+        </div>
+
+        <!-- Game Over Screen Overlay -->
+        <div id="game-over-overlay" class="overlay hidden">
+          <div class="modal-content">
+            <h2 class="modal-title">우와, 멋져요!</h2>
+            <p class="modal-desc">
+              스네이크가 엄청 길어졌어요!<br>
+              도감에 새로운 친구들이 열렸는지 확인해보세요!
+            </p>
+            <button id="restart-btn" class="btn btn-success">다시 재미있게 하기 🔄</button>
+          </div>
+        </div>
+
+        <!-- Level Clear Screen Overlay -->
+        <div id="level-clear-overlay" class="overlay hidden">
+          <div class="modal-content">
+            <h2 id="clear-title" class="modal-title" style="color: #38d638; text-shadow: 0 0 15px rgba(56, 214, 56, 0.4);">✨ 레벨 클리어! ✨</h2>
+            <p class="modal-desc" id="clear-desc">
+              태양이가 해냈어요! 숫자를 다 맞추고 탈출구로 골인했어요!<br>
+              다음 더 어려운 퍼즐이 기다리고 있어요.
+            </p>
+            <button id="next-level-btn" class="btn btn-success">다음 스테이지 출발! 🚀</button>
+          </div>
+        </div>
+
+        <!-- Pause Screen Overlay -->
+        <div id="pause-overlay" class="overlay hidden">
+          <div class="modal-content">
+            <h2 class="modal-title">잠깐 쉬어요 ⏸️</h2>
+            <p class="modal-desc">준비가 되면 다시 시작해요!</p>
+            <button id="resume-btn" class="btn btn-primary">계속하기 ▶️</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Column: Info, Control Panel, D-Pad -->
+      <aside class="side-panel">
+        <!-- Score Dashboard -->
+        <section class="panel score-board">
+          <div class="score-box" id="p1-score-box">
+            <div class="score-label" id="p1-score-label">현재 길이 (Score)</div>
+            <div id="score-val" class="score-val">1</div>
+          </div>
+          <div class="score-box hidden" id="p2-score-box">
+            <div class="score-label">현재 길이 (P2)</div>
+            <div id="score2-val" class="score-val">1</div>
+          </div>
+          <div class="score-box">
+            <div class="score-label">최고 기록 (Best)</div>
+            <div id="highscore-val" class="score-val">1</div>
+          </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section class="panel controls-panel">
+          <div class="setting-row">
+            <span class="setting-label">태양이 맞춤 속도</span>
+            <div class="segmented-control">
+              <button id="speed-slow" class="segment-btn active">거북이 🐢</button>
+              <button id="speed-normal" class="segment-btn">토끼 🐇</button>
+              <button id="speed-fast" class="segment-btn">치타 🐆</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <span class="setting-label">게임 모드</span>
+            <div class="segmented-control">
+              <button id="mode-nodie" class="segment-btn active">안 죽는 모드 🛡️</button>
+              <button id="mode-classic" class="segment-btn">도전 모드 💥</button>
+              <button id="mode-adventure" class="segment-btn">모험 모드 (퍼즐) 🗺️</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <span class="setting-label">플레이 모드</span>
+            <div class="segmented-control">
+              <button id="play-single" class="segment-btn active">싱글 👤</button>
+              <button id="play-coop" class="segment-btn">아빠랑 협동 👥</button>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <span class="setting-label">목소리 설명 (TTS)</span>
+            <select id="voice-select" class="select-theme">
+              <option value="ko" selected>한국어 🇰🇷</option>
+              <option value="en">English 🇬🇧</option>
+              <option value="off">끄기 🔇</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <span class="setting-label">배경 테마</span>
+            <select id="theme-select" class="select-theme">
+              <option value="ocean">🌊 바다 (Ocean)</option>
+              <option value="volcano">🌋 볼케이노 (Volcano)</option>
+              <option value="deepsea">🦑 심해 (Deep Sea)</option>
+              <option value="mars">☄️ 화성 (Mars)</option>
+              <option value="moon">🌕 달 (Moon)</option>
+              <option value="space" selected>🌌 우주 (Space)</option>
+              <option value="galaxy">🪐 갤럭시 (Galaxy)</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <span class="setting-label">배경 음악 & 소리</span>
+            <button id="mute-btn" class="audio-btn" title="음악 켜기/끄기">🔊</button>
+          </div>
+        </section>
+
+        <!-- Virtual D-Pad for tablet/phone/mouse play -->
+        <section class="panel dpad-container">
+          <div class="dpad-row">
+            <button id="dpad-up" class="dpad-btn dpad-up" aria-label="Up">▲</button>
+          </div>
+          <div class="dpad-row">
+            <button id="dpad-left" class="dpad-btn dpad-left" aria-label="Left">◀</button>
+            <div style="width: 60px;"></div> <!-- Spacer center -->
+            <button id="dpad-right" class="dpad-btn dpad-right" aria-label="Right">▶</button>
+          </div>
+          <div class="dpad-row">
+            <button id="dpad-down" class="dpad-btn dpad-down" aria-label="Down">▼</button>
+          </div>
+        </section>
+
+        <!-- V2 Special Ability Button -->
+        <button id="ability-btn" class="btn btn-ability disabled" disabled>
+          ✨ 스페셜 능력 준비 중! (Space)
+        </button>
+
+        <button id="pause-btn" class="btn btn-secondary" disabled>
+          ⏸️ 잠깐 쉬기 (P)
+        </button>
+
+        <!-- Open Gallery Button -->
+        <button id="gallery-btn" class="btn btn-secondary">
+          🎨 넘버블록스 도감 구경하기 (Gallery)
+        </button>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Unlocked Characters Gallery Modal -->
+  <div id="gallery-modal" class="gallery-modal">
+    <div class="gallery-box">
+      <div class="gallery-header">
+        <h2>🎨 넘버블록스 친구들 도감</h2>
+        <button id="close-gallery-btn" class="gallery-close" aria-label="Close">✕</button>
+      </div>
+      <p class="modal-desc" style="text-align: left; margin-bottom: 10px;">
+        게임에서 쌓은 길이만큼 친구들이 열려요! 캐릭터 카드를 누르면 고유한 실로폰 소리가 납니다. 🎵
+      </p>
+      <div id="gallery-grid" class="gallery-grid">
+        <!-- Gallery cards populated dynamically by JS -->
+      </div>
+    </div>
+  </div>
+
+  <script src="audio.js?v=1.1"></script>
+  <script src="game.js?v=1.2"></script>
+</body>
+</html>
